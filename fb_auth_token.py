@@ -1,7 +1,7 @@
 # Used from  https://github.com/philipperemy/Deep-Learning-Tinder/blob/master/tinder_token.py
 
 import re
-
+import os
 import requests
 import robobrowser
 
@@ -13,8 +13,8 @@ def get_fb_access_token(email, password):
     s = robobrowser.RoboBrowser(user_agent=MOBILE_USER_AGENT, parser="lxml")
     s.open(FB_AUTH)
     f = s.get_form()
-    f["pass"] = password
-    f["email"] = email
+    f["pass"] = os.environ['PASSWORD']
+    f["email"] = os.environ['USERNAME']
     s.submit_form(f)
     f = s.get_form()
     try:
