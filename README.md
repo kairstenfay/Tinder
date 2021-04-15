@@ -508,3 +508,8 @@ The following is a sample result for friends_pingtimes(): </h4>
 	  }
 }
 ```
+## Tests
+
+Run doctests with
+
+      python -m doctest ./bin/harvest.py
