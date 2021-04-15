@@ -1,8 +1,13 @@
 # coding=utf-8
+import sys
 import json
+import requests
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "etc"))
 
 import config
-import requests
+
 
 get_headers = {
     'app_version': '6.9.4',
