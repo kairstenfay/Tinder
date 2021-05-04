@@ -6,6 +6,7 @@ from collections import defaultdict
 from typing import Any, Dict, List
 from pathlib import Path
 from pymongo import MongoClient
+from pymongo.errors import ServerSelectionTimeoutError
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -105,16 +106,24 @@ if __name__ == '__main__':
 
     results = {}
 
-    with MongoClient('mongodb://localhost:9999') as client:
-        db = client.tinder
-        users = db.users
-        for record in recs:
-            record = flatten(record)
-            # Update the database
-            users.update_one(
-                { '_id': record['_id'] },
-                { '$set': record },
-                upsert=True)
+    try:
+        with MongoClient('mongodb://localhost:9999') as client:
+            db = client.tinder
+            users = db.users
+            for record in recs:
+                record = flatten(record)
+
+                logging.debug(f"Upserting {record} to the database")
+                # Update the database
+                users.update_one(
+                    { '_id': record['_id'] },
+                    { '$set': record },
+                    upsert=True)
+
+    except ServerSelectionTimeoutError as error:
+        logging.warning('Database not available. Saving results to file.')
+        logging.debug(error)
+        write_json(record, 'data/recommendations.json')
 
     if args.submit_images:
         objects = defaultdict(int)
