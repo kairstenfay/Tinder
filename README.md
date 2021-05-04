@@ -349,7 +349,7 @@ Note: All curls must be sent with the headers as well (the only exception is tha
 	<tbody>
 		<tr>
 			<td>200</td>
-			<td>Everything went okay, and 
+			<td>Everything went okay, and
 				returned a result (if any).</td>
 		</tr>
 		<tr>
