@@ -65,6 +65,8 @@ def process_photos(user: Dict[str, Any], objects: Dict[str, int]) -> List[Dict[s
 
 
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
     parser = argparse.ArgumentParser(
         description= __doc__,
         formatter_class=argparse.RawTextHelpFormatter
@@ -102,28 +104,30 @@ if __name__ == '__main__':
         recs = read_json(args.data_export)
 
     assert recs['meta']['status'] == 200, "Something went wrong"
-    recs = recs['data']['results']
+    results = []
 
-    results = {}
+    for record in recs['data']['results']:
+        results.append(flatten(record))
 
     try:
         with MongoClient('mongodb://localhost:9999') as client:
             db = client.tinder
             users = db.users
-            for record in recs:
-                record = flatten(record)
 
-                logging.debug(f"Upserting {record} to the database")
+            for result in results:
+                logging.debug(f"Upserting {result} to the database")
                 # Update the database
                 users.update_one(
-                    { '_id': record['_id'] },
-                    { '$set': record },
+                    { '_id': result['_id'] },
+                    { '$set': result },
                     upsert=True)
 
     except ServerSelectionTimeoutError as error:
-        logging.warning('Database not available. Saving results to file.')
+        logging.warning(f'Database not available. Saving results to {args.download_file}.')
         logging.debug(error)
-        write_json(record, 'data/recommendations.json')
+
+        recs['data']['results'] = results
+        write_json(recs, 'data/recommendations.json')
 
     if args.submit_images:
         objects = defaultdict(int)
